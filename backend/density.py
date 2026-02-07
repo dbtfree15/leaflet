@@ -23,7 +23,11 @@ def fetch_buildings(polygon: Polygon) -> List[Dict]:
     logger.info("Fetching buildings from OSM...")
 
     try:
-        buildings = ox.features_from_polygon(polygon, tags={"building": True})
+        # osmnx v2 moved features_from_polygon into ox.features submodule
+        if hasattr(ox, "features_from_polygon"):
+            buildings = ox.features_from_polygon(polygon, tags={"building": True})
+        else:
+            buildings = ox.features.features_from_polygon(polygon, tags={"building": True})
 
         logger.info(f"Found {len(buildings)} buildings")
 

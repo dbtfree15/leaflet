@@ -36,7 +36,9 @@ def fetch_road_network(polygon: Polygon, travel_mode: str = "walk") -> nx.MultiD
 
     logger.info(f"Network fetched: {len(G.nodes)} nodes, {len(G.edges)} edges")
 
-    G = ox.add_edge_lengths(G)
+    # osmnx v2+ adds edge lengths during graph creation; v1 needs this call
+    if hasattr(ox, "add_edge_lengths"):
+        G = ox.add_edge_lengths(G)
 
     for u, v, key, data in G.edges(keys=True, data=True):
         if "name" not in data:
