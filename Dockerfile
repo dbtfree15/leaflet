@@ -2,13 +2,9 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install system dependencies for osmnx / geos / proj
+# Install system dependencies for osmnx / geos
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgeos-dev \
-    libproj-dev \
-    proj-data \
-    proj-bin \
-    libgdal-dev \
     gcc \
     g++ \
     && rm -rf /var/lib/apt/lists/*
