@@ -1,6 +1,7 @@
 """
 OpenStreetMap network fetching and graph building.
 """
+import os
 import osmnx as ox
 import networkx as nx
 from shapely.geometry import Polygon
@@ -11,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 ox.settings.use_cache = True
 ox.settings.log_console = True
+ox.settings.cache_folder = os.getenv("OSM_CACHE_DIR", "./cache/osm")
 
 
 def fetch_road_network(polygon: Polygon, travel_mode: str = "walk") -> nx.MultiDiGraph:

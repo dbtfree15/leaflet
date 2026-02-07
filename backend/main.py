@@ -41,6 +41,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Ensure cache directory exists
+cache_dir = os.getenv("OSM_CACHE_DIR", "./cache/osm")
+os.makedirs(cache_dir, exist_ok=True)
+
 # Mount static frontend files
 frontend_dir = os.path.join(os.path.dirname(__file__), "..", "frontend")
 frontend_dir = os.path.abspath(frontend_dir)
