@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaflet — Flyer Route Planner</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div id="container">
+        <aside id="sidebar">
+            <h1>Leaflet</h1>
+            <p class="subtitle">Flyer Route Planner</p>
+
+            <section class="panel">
+                <h2>1. Define Area</h2>
+                <div class="button-group">
+                    <button id="btnCircle" class="btn-mode active">Center + Radius</button>
+                    <button id="btnPolygon" class="btn-mode">Draw Polygon</button>
+                </div>
+                <div id="circleInputs" class="mode-panel">
+                    <input type="text" id="addressInput" placeholder="Enter address or click map">
+                    <button id="btnGeocode" class="btn-small">Search</button>
+                    <label>Radius: <span id="radiusValue">1.0</span> km</label>
+                    <input type="range" id="radiusSlider" min="0.2" max="5" step="0.1" value="1.0">
+                </div>
+                <div id="polygonInputs" class="mode-panel hidden">
+                    <p class="hint">Click on the map to draw vertices. Double-click to finish the polygon.</p>
+                    <button id="btnClearPolygon" class="btn-small">Clear Polygon</button>
+                    <p id="polygonStatus" class="hint"></p>
+                </div>
+            </section>
+
+            <section class="panel">
+                <h2>2. Set Parameters</h2>
+                <label>Number of Routes:
+                    <input type="number" id="numRoutes" min="1" max="20" value="4">
+                </label>
+                <label>Total Flyers:
+                    <input type="number" id="totalFlyers" min="10" max="100000" value="1000" step="50">
+                </label>
+                <label>Travel Mode:
+                    <select id="travelMode">
+                        <option value="walking">Walking</option>
+                        <option value="driving">Driving</option>
+                    </select>
+                </label>
+                <label>Balance By:
+                    <select id="balancePriority">
+                        <option value="density">Address Density (equal flyers)</option>
+                        <option value="area">Area (equal distance)</option>
+                    </select>
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="returnToStart"> Return to start point
+                </label>
+            </section>
+
+            <section class="panel">
+                <button id="btnGenerate" class="btn-primary" disabled>Generate Routes</button>
+                <div id="status"></div>
+            </section>
+
+            <section class="panel" id="resultsPanel" style="display: none;">
+                <h2>Routes</h2>
+                <div id="summary"></div>
+                <div id="routesList"></div>
+                <div class="export-buttons">
+                    <button id="btnExportGPX" class="btn-secondary">Export GPX</button>
+                    <button id="btnExportKML" class="btn-secondary">Export KML</button>
+                    <button id="btnExportGeoJSON" class="btn-secondary">Export GeoJSON</button>
+                    <button id="btnPrint" class="btn-secondary">Print Directions</button>
+                </div>
+            </section>
+        </aside>
+
+        <main id="mapContainer">
+            <div id="map"></div>
+        </main>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="/static/app.js"></script>
+</body>
+</html>
