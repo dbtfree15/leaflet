@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  leaflet:
+    build: .
+    container_name: leaflet
+    ports:
+      - "8000:8000"
+    volumes:
+      - leaflet_cache:/app/cache
+    environment:
+      - OSM_CACHE_DIR=/app/cache/osm
+      - HOST=0.0.0.0
+      - PORT=8000
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  leaflet_cache:
+    driver: local

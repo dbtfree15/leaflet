@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Route Directions — Leaflet</title>
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            .page-break { page-break-before: always; }
+            body { margin: 0; }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 20px;
+            color: #333;
+        }
+
+        .no-print {
+            padding: 15px;
+            margin-bottom: 20px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .no-print button {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .no-print .btn-print {
+            background: #27ae60;
+            color: white;
+        }
+
+        .no-print .btn-close {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .route-page {
+            margin-bottom: 40px;
+        }
+
+        .route-header {
+            border-left: 8px solid;
+            padding-left: 15px;
+            margin-bottom: 20px;
+        }
+
+        .route-header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .route-info {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+
+        .info-item strong {
+            display: block;
+            color: #666;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-item span {
+            display: block;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 4px;
+            color: #2c3e50;
+        }
+
+        .directions {
+            margin-top: 25px;
+        }
+
+        .directions h2 {
+            margin-bottom: 15px;
+            font-size: 16px;
+            color: #555;
+        }
+
+        .direction-step {
+            display: flex;
+            margin-bottom: 10px;
+            padding: 8px 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .step-number {
+            width: 32px;
+            height: 32px;
+            background: #3498db;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            flex-shrink: 0;
+            margin-right: 12px;
+        }
+
+        .step-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .step-instruction {
+            font-size: 14px;
+        }
+
+        .step-distance {
+            color: #888;
+            font-size: 13px;
+            white-space: nowrap;
+            margin-left: 10px;
+        }
+
+        .google-maps-link {
+            margin-top: 15px;
+            padding: 10px;
+            background: #eaf2f8;
+            border-radius: 4px;
+            font-size: 13px;
+            word-break: break-all;
+        }
+
+        .google-maps-link a {
+            color: #2980b9;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print">
+        <button class="btn-print" onclick="window.print()">Print Directions</button>
+        <button class="btn-close" onclick="window.close()">Close</button>
+    </div>
+
+    <div id="content"></div>
+
+    <script>
+        const content = document.getElementById('content');
+
+        // Get data from sessionStorage
+        const dataStr = sessionStorage.getItem('printData');
+
+        if (!dataStr) {
+            content.innerHTML = '<div class="no-data">No route data found. Please generate routes first.</div>';
+        } else {
+            const jobData = JSON.parse(dataStr);
+            renderDirections(jobData);
+        }
+
+        function renderDirections(jobData) {
+            jobData.routes.forEach((route, index) => {
+                const pageDiv = document.createElement('div');
+                pageDiv.className = 'route-page' + (index > 0 ? ' page-break' : '');
+
+                const stepsHtml = (route.turn_by_turn && route.turn_by_turn.length > 0)
+                    ? route.turn_by_turn.map(step => `
+                        <div class="direction-step">
+                            <div class="step-number">${step.step}</div>
+                            <div class="step-content">
+                                <span class="step-instruction">${step.instruction}</span>
+                                <span class="step-distance">${Math.round(step.distance_m)} m</span>
+                            </div>
+                        </div>
+                    `).join('')
+                    : '<p style="color: #999; padding: 10px;">No detailed directions available for this route.</p>';
+
+                pageDiv.innerHTML = `
+                    <div class="route-header" style="border-left-color: ${route.color}">
+                        <h1>Route ${route.route_id}</h1>
+                    </div>
+
+                    <div class="route-info">
+                        <div class="info-item">
+                            <strong>Flyers</strong>
+                            <span>${route.assigned_flyers}</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Addresses</strong>
+                            <span>~${route.estimated_addresses}</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Distance</strong>
+                            <span>${(route.total_distance_m / 1000).toFixed(1)} km</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Est. Time</strong>
+                            <span>${route.estimated_duration_min} min</span>
+                        </div>
+                    </div>
+
+                    <div class="directions">
+                        <h2>Turn-by-Turn Directions</h2>
+                        ${stepsHtml}
+                    </div>
+
+                    ${route.google_maps_url ? `
+                        <div class="google-maps-link">
+                            <strong>Google Maps:</strong>
+                            <a href="${route.google_maps_url}" target="_blank" rel="noopener">Open in Google Maps</a>
+                        </div>
+                    ` : ''}
+                `;
+
+                content.appendChild(pageDiv);
+            });
+        }
+    </script>
+</body>
+</html>
